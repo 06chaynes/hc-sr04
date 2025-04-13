@@ -32,7 +32,7 @@ impl Distance {
 
 /// Possible error returned by sensor.
 #[derive(Debug, Copy, Clone)]
-pub enum SensorError {
+pub enum HcSr04Error {
     /// Wrong mode for the operation.
     WrongMode,
     /// Timer error.
@@ -101,7 +101,7 @@ where
     /// `nb::Error::WouldBlock`.
     ///
     /// The sensor state is advanced only by calling the `update` method.
-    pub fn distance(&mut self) -> embedded_hal_nb::nb::Result<Distance, SensorError> {
+    pub fn distance(&mut self) -> embedded_hal_nb::nb::Result<Distance, HcSr04Error> {
         match self.mode {
             // Idle state -> trigger measurement.
             Mode::Idle => {
@@ -127,10 +127,10 @@ where
     ///    - In MeasurePulse mode, if the echo is now low, the measurement is computed.
     ///
     /// # Errors
-    /// Returns `SensorError::WrongMode` if update is called in an unexpected state.
-    pub fn update(&mut self) -> Result<(), SensorError> {
+    /// Returns `HcSr04Error::WrongMode` if update is called in an unexpected state.
+    pub fn update(&mut self) -> Result<(), HcSr04Error> {
         // Read the echo pin once.
-        let echo_high = self.echo_pin.is_high().map_err(|_| SensorError::PinError)?;
+        let echo_high = self.echo_pin.is_high().map_err(|_| HcSr04Error::PinError)?;
 
         match self.mode {
             Mode::Triggered => {
@@ -152,18 +152,18 @@ where
                 }
                 Ok(())
             }
-            _ => Err(SensorError::WrongMode),
+            _ => Err(HcSr04Error::WrongMode),
         }
     }
 
     /// Trigger the sensor by pulsing the trigger pin.
-    fn trigger(&mut self) -> Result<(), SensorError> {
+    fn trigger(&mut self) -> Result<(), HcSr04Error> {
         self.trig_pin
             .set_high()
-            .map_err(|_| SensorError::PinError)?;
+            .map_err(|_| HcSr04Error::PinError)?;
         // Wait for 10 microseconds.
         self.delay.delay_us(10);
-        self.trig_pin.set_low().map_err(|_| SensorError::PinError)?;
+        self.trig_pin.set_low().map_err(|_| HcSr04Error::PinError)?;
         // Set internal state to waiting for echo.
         self.mode = Mode::Triggered;
         Ok(())
@@ -171,7 +171,7 @@ where
 
     /// Blocking measurement function that repeatedly calls update
     /// until the sensor returns a valid distance.
-    pub fn measure(&mut self) -> Result<Distance, SensorError> {
+    pub fn measure(&mut self) -> Result<Distance, HcSr04Error> {
         // If in Idle mode, this call will trigger a measurement.
         // Otherwise, it might immediately return a valid reading.
         match self.distance() {
