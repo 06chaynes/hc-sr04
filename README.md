@@ -19,7 +19,7 @@ hc-sr04 = "0.2.0"
 
 ### Example
 
-Here's a basic usage example for the HC-SR04 ultrasonic distance sensor using the `hc-sr04` crate. This example assumes you are using the ESP32 platform with the `esp-idf-hal` crate.:
+For a complete working example using ESP32, check out the [examples/esp32-example](examples/esp32-example) directory. Here's a basic demonstration of how to use the HC-SR04 ultrasonic distance sensor with the `esp-idf-hal` crate:
 
 ```rust
 use esp_idf_hal::{delay::Delay, peripherals::Peripherals};
@@ -67,7 +67,7 @@ The driver triggers the HC-SR04 sensor and measures the duration of the echo pul
 Licensed under either of
 
 - Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
-  http://www.apache.org/licenses/LICENSE-2.0)
-- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+  <http://www.apache.org/licenses/LICENSE-2.0>)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
 
 at your option.

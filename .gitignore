@@ -1,3 +1,7 @@
-/target
-**/*.rs.bk
+/.vscode
+**/.embuild
+**/target
 Cargo.lock
+**/build
+partitions.bin
+**/.DS_Store
