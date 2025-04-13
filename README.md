@@ -1,21 +1,69 @@
 # `hc-sr04`
+
 > A platform agnostic driver to interface with the HC-SR04 (ultrasonic distance)
 
-## What works
-- Estimating distance based on interrupt
+## Features
 
-## Examples
-See the [`examples`][3] folder for usage. To find the dependencies of the examples
-copy the `dev-dependencies` from `Cargo.toml`.
+- Platform agnostic using `embedded-hal` traits
+- Support for both blocking and non-blocking measurements
+- Distance measurements with accurate timing using embedded clocks
 
-## TODO
-- [x] Test on embedded target (tested on [`f3`][1], see example)
-- [ ] Move to timers based purely on [`embedded-hal`][2]
-- [ ] Find out why crate only seem to work in `--release` mode
-- [ ] Test on single board computer (RPi etc.)
-- [ ] Gather feedback on API
+## Usage
+
+Add this to your `Cargo.toml`:
+
+```toml
+[dependencies]
+hc-sr04 = "0.2.0"
+```
+
+### Example
+
+Here's a basic usage example for the HC-SR04 ultrasonic distance sensor using the `hc-sr04` crate. This example assumes you are using the ESP32 platform with the `esp-idf-hal` crate.:
+
+```rust
+use esp_idf_hal::{delay::Delay, peripherals::Peripherals};
+use hc_sr04::HcSr04;
+use log::{error, info};
+
+// Create clock implementation for ESP32
+struct SystemClock;
+impl embedded_timers::clock::Clock for SystemClock {
+  type Instant = embedded_timers::instant::Instant32<1_000_000>;
+  fn now(&self) -> Self::Instant {
+    embedded_timers::instant::Instant32::new(unsafe {
+      esp_idf_sys::esp_timer_get_time() as u32
+    })
+  }
+}
+
+// Initialize sensor with ESP32 pins
+let peripherals = Peripherals::take().unwrap();
+let echo_pin = esp_idf_hal::gpio::PinDriver::input(pins.gpio9).unwrap();
+let trigger_pin = esp_idf_hal::gpio::PinDriver::output(pins.gpio10).unwrap();
+
+let clock = SystemClock;
+let delay = Delay::new(1000);
+let mut sensor = HcSr04::new(trigger_pin, echo_pin, clock, delay);
+
+// Take measurements
+match sensor.measure() {
+  Ok(distance) => info!("Distance: {} cm ({} mm)", distance.cm(), distance.mm()),
+  Err(e) => error!("Error: {:?}", e),
+}
+```
+
+## How it Works
+
+The driver triggers the HC-SR04 sensor and measures the duration of the echo pulse to calculate distance. It supports:
+
+- Trigger pulse generation
+- Echo pulse timing measurement
+- Distance calculation
+- Error handling for timeout and pin failures
 
 ## License
+
 Licensed under either of
 
 - Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
@@ -23,7 +71,3 @@ Licensed under either of
 - MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
 at your option.
-
-[1]: https://github.com/japaric/f3
-[2]: https://github.com/japaric/embedded-hal/issues/59
-[3]: examples/
