@@ -5,7 +5,7 @@
 //! and a delay object that implements `embedded_hal::delay::DelayNs`. An external update or interrupt
 //! is still required to advance the sensor’s state.
 //!
-//! [2]: http://www.micropik.com/PDF/HCSR04.pdf
+//! [2]: https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf
 #![no_std]
 use embedded_hal::delay::DelayNs;
 use embedded_hal::digital::{InputPin, OutputPin};
