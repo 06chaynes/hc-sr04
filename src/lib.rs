@@ -145,8 +145,14 @@ where
                     // Calculate elapsed time.
                     let elapsed = self.clock.now() - start;
                     let ticks = elapsed.as_micros() as u32;
-                    // Calculate distance_mm using:
-                    // distance_mm = elapsed_us * (171,500) / 1_000_000.
+                    // Calculate distance_mm using the speed of sound (343 m/s at sea level, 20°C):
+                    // 1. Sound travels at 343 meters/second = 0.343 meters/millisecond = 0.000343 meters/microsecond
+                    // 2. Distance = (Time × Speed) / 2  (divide by 2 because sound travels to and from the object)
+                    // 3. In mm/us: 0.000343 * 1000 mm/m = 0.343 mm/us
+                    // 4. Simplified for integer math: (0.343 mm/us * 500,000) / 1,000 = 171.5 mm/us
+                    // 5. Further simplified: 171,500 / 1,000,000
+                    //
+                    // Therefore: distance_mm = elapsed_microseconds * 171_500 / 1_000_000
                     let distance_mm = (ticks * 171_500) / 1_000_000;
                     self.mode = Mode::Measurement(Distance(distance_mm));
                 }
